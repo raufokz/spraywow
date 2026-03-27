@@ -7,7 +7,6 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -103,9 +102,7 @@ class ProductController extends Controller
         $validated['is_active'] = $product?->is_active ?? true;
 
         if ($request->hasFile('image')) {
-            $validated['image_url'] = Storage::disk('public')->url(
-                $request->file('image')->store('products', 'public')
-            );
+            $validated['image_url'] = $this->storeImage($request);
 
             if ($product?->exists) {
                 $this->deleteStoredImage($product->image_url);
@@ -155,7 +152,7 @@ class ProductController extends Controller
             return;
         }
 
-        $publicStorageUrl = Storage::disk('public')->url('');
+        $publicStorageUrl = rtrim(asset('uploads/products'), '/').'/';
 
         if (! str_starts_with($imageUrl, $publicStorageUrl)) {
             return;
@@ -164,7 +161,26 @@ class ProductController extends Controller
         $path = ltrim(Str::after($imageUrl, $publicStorageUrl), '/');
 
         if ($path !== '') {
-            Storage::disk('public')->delete($path);
+            $absolutePath = public_path('uploads/products/'.$path);
+
+            if (is_file($absolutePath)) {
+                unlink($absolutePath);
+            }
         }
+    }
+
+    protected function storeImage(Request $request): string
+    {
+        $file = $request->file('image');
+        $directory = public_path('uploads/products');
+
+        if (! is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        $filename = Str::uuid()->toString().'.'.$file->getClientOriginalExtension();
+        $file->move($directory, $filename);
+
+        return asset('uploads/products/'.$filename);
     }
 }
