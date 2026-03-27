@@ -78,10 +78,32 @@ jobs:
           key: ${{ secrets.HPANEL_SSH_KEY }}
           port: ${{ secrets.HPANEL_SSH_PORT }}
           script: |
+            cat > "${{ secrets.HPANEL_PUBLIC_PATH }}/index.php" <<'PHP'
+            <?php
+
+            use Illuminate\Foundation\Application;
+            use Illuminate\Http\Request;
+
+            define('LARAVEL_START', microtime(true));
+
+            if (file_exists($maintenance = '${{ secrets.HPANEL_APP_PATH }}/storage/framework/maintenance.php')) {
+                require $maintenance;
+            }
+
+            require '${{ secrets.HPANEL_APP_PATH }}/vendor2/autoload.php';
+
+            /** @var Application $app */
+            $app = require_once '${{ secrets.HPANEL_APP_PATH }}/bootstrap/app.php';
+
+            $app->handleRequest(Request::capture());
+            PHP
+
             cd ${{ secrets.HPANEL_APP_PATH }}
+            chmod -R 775 storage bootstrap/cache
             php artisan config:clear
             php artisan cache:clear
             php artisan view:clear
             php artisan migrate --force
+            php artisan storage:link || true
             php artisan view:cache
             php artisan route:cache
