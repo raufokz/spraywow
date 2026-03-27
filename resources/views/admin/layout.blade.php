@@ -19,35 +19,38 @@
         ];
     @endphp
 
-    <div class="dashboard-app">
+    <div class="dashboard-app dashboard-app-has-sidebar">
         <div class="dashboard-backdrop hidden" data-dashboard-backdrop></div>
 
-        <aside class="dashboard-sidebar hidden lg:flex" data-dashboard-sidebar>
+        <aside class="dashboard-sidebar dashboard-sidebar-collapsible is-collapsed" data-dashboard-sidebar>
             <div>
                 <a href="{{ route('admin.dashboard') }}" class="dashboard-brand">
                     <img src="{{ asset('images/spray-wow-logo-500.webp') }}" alt="SprayWow" class="h-12 w-auto">
                 </a>
-                <p class="mt-4 text-xs font-semibold uppercase tracking-[0.24em] text-sky-200/80">Admin workspace</p>
+                <p class="dashboard-sidebar-kicker mt-4 text-xs font-semibold uppercase tracking-[0.24em] text-sky-200/80" data-dashboard-label>Admin workspace</p>
 
                 <nav class="mt-8 space-y-2">
                     @foreach($adminNav as $item)
-                        <a href="{{ route($item['route']) }}" class="dashboard-nav-link {{ $item['active'] ? 'is-active' : '' }}">
+                        <a href="{{ route($item['route']) }}" class="dashboard-nav-link {{ $item['active'] ? 'is-active' : '' }}" title="{{ $item['label'] }}">
                             <span class="dashboard-nav-icon">@include('admin.partials.icon', ['name' => $item['icon']])</span>
-                            <span>{{ $item['label'] }}</span>
+                            <span data-dashboard-label>{{ $item['label'] }}</span>
                         </a>
                     @endforeach
                 </nav>
             </div>
 
             <div class="dashboard-sidebar-foot">
-                <a href="{{ route('home') }}" class="dashboard-secondary-link">View storefront</a>
+                <a href="{{ route('home') }}" class="dashboard-secondary-link" data-dashboard-footer-link>
+                    <span data-dashboard-label>View storefront</span>
+                    <span class="dashboard-footer-short">Home</span>
+                </a>
             </div>
         </aside>
 
         <div class="dashboard-main">
             <div class="dashboard-topbar">
                 <div>
-                    <button type="button" class="dashboard-menu-button lg:hidden" data-dashboard-toggle aria-label="Open dashboard menu">
+                    <button type="button" class="dashboard-menu-button" data-dashboard-toggle aria-label="Toggle dashboard menu" aria-expanded="false">
                         <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
                             <path d="M4 7h16M4 12h16M4 17h16"></path>
                         </svg>
@@ -55,7 +58,7 @@
                     <p class="dashboard-kicker">@yield('kicker', 'Admin')</p>
                     <h1 class="dashboard-title">@yield('heading', 'Dashboard')</h1>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap items-center gap-3">
                     @yield('header_actions')
                     <a href="{{ route('profile.edit') }}" class="dashboard-profile-pill">
                         <span>{{ auth()->user()->name }}</span>

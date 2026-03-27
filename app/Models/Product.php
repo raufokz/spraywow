@@ -31,6 +31,7 @@ class Product extends Model
         'is_active',
         'meta_title',
         'meta_description',
+        'product_link',
     ];
 
     protected function casts(): array

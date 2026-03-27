@@ -1,5 +1,45 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ $product->exists ? 'Edit product' : 'Create product' }}</title>@vite(['resources/css/app.css', 'resources/js/app.js'])</head>
-<body class="admin-shell"><div class="shell py-8"><a href="{{ route('admin.products.index') }}" class="text-sm text-sky-700">← Back to products</a><form method="POST" action="{{ $product->exists ? route('admin.products.update', $product) : route('admin.products.store') }}" class="mt-6 glass-panel p-6">@csrf @if($product->exists) @method('PUT') @endif<div class="grid gap-4 md:grid-cols-2"><select name="category_id" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900">@foreach($categories as $category)<option value="{{ $category->id }}" @selected(old('category_id', $product->category_id) == $category->id)>{{ $category->name }}</option>@endforeach</select><input name="name" value="{{ old('name', $product->name) }}" placeholder="Name" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900"><input name="slug" value="{{ old('slug', $product->slug) }}" placeholder="Slug" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900"><input name="sku" value="{{ old('sku', $product->sku) }}" placeholder="SKU" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900"><input name="tagline" value="{{ old('tagline', $product->tagline) }}" placeholder="Tagline" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900 md:col-span-2"><input name="short_description" value="{{ old('short_description', $product->short_description) }}" placeholder="Short description" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900 md:col-span-2"><textarea name="description" rows="5" placeholder="Description" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900 md:col-span-2">{{ old('description', $product->description) }}</textarea><input name="price" value="{{ old('price', $product->price) }}" placeholder="Price" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900"><input name="compare_price" value="{{ old('compare_price', $product->compare_price) }}" placeholder="Compare price" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900"><input name="stock" value="{{ old('stock', $product->stock) }}" placeholder="Stock" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900"><input name="image_url" value="{{ old('image_url', $product->image_url) }}" placeholder="Image URL or data URI" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900 md:col-span-2"><textarea name="gallery" rows="4" placeholder="Gallery URLs, one per line" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900">{{ old('gallery', collect($product->gallery ?? [])->implode(PHP_EOL)) }}</textarea><textarea name="benefits" rows="4" placeholder="Benefits, one per line" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900">{{ old('benefits', collect($product->benefits ?? [])->implode(PHP_EOL)) }}</textarea><input name="meta_title" value="{{ old('meta_title', $product->meta_title) }}" placeholder="Meta title" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900"><input name="meta_description" value="{{ old('meta_description', $product->meta_description) }}" placeholder="Meta description" class="rounded-2xl border border-sky-100 px-4 py-3 text-slate-900"><label class="flex items-center gap-3 text-slate-700"><input type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $product->is_featured))> Featured</label><label class="flex items-center gap-3 text-slate-700"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $product->is_active ?? true))> Active</label></div><button class="btn-primary mt-6">{{ $product->exists ? 'Update product' : 'Create product' }}</button></form></div></body>
-</html>
+@extends('admin.layout')
+
+@section('title', $product->exists ? 'Edit Product' : 'New Product')
+@section('kicker', 'Catalog Management')
+@section('heading', $product->exists ? 'Edit Product' : 'New Product')
+
+@section('header_actions')
+    <a href="{{ route('admin.products.index') }}" class="btn-secondary !px-4 !py-2">All products</a>
+@endsection
+
+@section('content')
+    @if($errors->any())
+        <div class="dashboard-alert dashboard-alert-error">
+            {{ $errors->first() }}
+        </div>
+    @endif
+
+    <div class="admin-product-page">
+        <section class="dashboard-panel">
+            <div class="dashboard-panel-head">
+                <div>
+                    <p class="dashboard-section-kicker">{{ $product->exists ? 'Edit Product' : 'New Product' }}</p>
+                    <h2 class="dashboard-section-title">
+                        {{ $product->exists ? 'Update product details and media' : 'Create a clean new product entry' }}
+                    </h2>
+                </div>
+                <a href="{{ route('admin.products.index') }}" class="dashboard-inline-link">View all products</a>
+            </div>
+
+            <div class="mt-6">
+                @include('admin.products._form-fields', ['product' => $product])
+            </div>
+        </section>
+
+        <aside class="dashboard-panel admin-product-sidecard">
+            <p class="dashboard-section-kicker">Publishing Notes</p>
+            <h3 class="dashboard-section-title text-[1.55rem]">{{ $product->exists ? 'Editing checklist' : 'Before you save' }}</h3>
+            <div class="mt-5 space-y-4 text-sm leading-7 text-slate-600">
+                <p>Use a concise product name that matches how customers will see it in the catalog.</p>
+                <p>Choose a clear product photo with a square or landscape crop so cards and previews stay neat across devices.</p>
+                <p>The product link should be a complete URL and can point to the storefront page, marketplace page, or campaign landing page.</p>
+            </div>
+        </aside>
+    </div>
+@endsection

@@ -693,7 +693,7 @@
     }
 
     .dashboard-app {
-        @apply flex min-h-screen;
+        @apply flex min-h-screen flex-col lg:flex-row;
     }
 
     .dashboard-backdrop {
@@ -701,7 +701,7 @@
     }
 
     .dashboard-sidebar {
-        @apply fixed inset-y-0 left-0 z-50 w-[18rem] flex-col justify-between border-r px-5 py-6 lg:sticky lg:top-0 lg:h-screen;
+        @apply z-30 flex w-full flex-col justify-between border-b px-5 py-6 lg:sticky lg:top-0 lg:h-screen lg:w-[18rem] lg:border-b-0 lg:border-r;
         border-color: rgba(191, 219, 254, 0.55);
         background:
             radial-gradient(circle at top right, rgba(34, 211, 238, 0.18), transparent 22%),
@@ -716,7 +716,7 @@
     }
 
     .dashboard-main {
-        @apply flex-1 px-4 py-4 sm:px-6 lg:px-8;
+        @apply min-w-0 flex-1 px-4 py-4 sm:px-6 lg:px-8;
     }
 
     .dashboard-topbar {
@@ -912,6 +912,109 @@
     .inventory-pill {
         @apply inline-flex items-center rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700;
     }
+
+    .dashboard-alert {
+        @apply mb-6 rounded-[24px] border px-5 py-4 text-sm font-medium shadow-sm;
+    }
+
+    .dashboard-alert-success {
+        @apply border-emerald-100 bg-emerald-50 text-emerald-700;
+    }
+
+    .dashboard-alert-error {
+        @apply border-rose-100 bg-rose-50 text-rose-700;
+    }
+
+    .admin-products-layout {
+        @apply grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)];
+    }
+
+    .admin-product-page {
+        @apply grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_22rem];
+    }
+
+    .admin-product-form {
+        @apply grid gap-5 md:grid-cols-2;
+    }
+
+    .admin-form-field {
+        @apply flex flex-col gap-2;
+    }
+
+    .admin-form-field-full {
+        @apply md:col-span-2;
+    }
+
+    .admin-form-label {
+        @apply text-sm font-semibold text-slate-800;
+    }
+
+    .admin-form-input {
+        @apply min-w-0 rounded-[20px] border border-sky-100 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-sky-300 focus:bg-white focus:ring-4 focus:ring-sky-100;
+    }
+
+    .admin-form-textarea {
+        @apply min-h-[10rem] resize-y;
+    }
+
+    .admin-form-file {
+        @apply file:mr-4 file:rounded-full file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-sky-700;
+    }
+
+    .admin-form-help {
+        @apply text-sm text-slate-500;
+    }
+
+    .admin-form-error {
+        @apply text-sm font-medium text-rose-600;
+    }
+
+    .admin-form-actions {
+        @apply flex flex-wrap items-center gap-3;
+    }
+
+    .admin-image-preview-card {
+        @apply grid gap-4 rounded-[24px] border border-dashed border-sky-200 bg-sky-50/70 p-4 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center;
+    }
+
+    .admin-image-preview-shell {
+        @apply overflow-hidden rounded-[20px] bg-white shadow-sm;
+        aspect-ratio: 4 / 3;
+    }
+
+    .admin-image-preview {
+        @apply h-full w-full object-cover;
+    }
+
+    .admin-products-thumb {
+        @apply h-16 w-16 rounded-[18px] object-cover;
+    }
+
+    .admin-products-grid {
+        @apply grid gap-4 sm:grid-cols-2;
+    }
+
+    .admin-product-card {
+        @apply flex h-full flex-col gap-4 rounded-[24px] border border-sky-100 bg-slate-50/75 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.05)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_50px_rgba(14,116,144,0.12)];
+    }
+
+    .admin-product-card-image {
+        @apply h-48 w-full rounded-[20px] object-cover;
+    }
+
+    .admin-products-toolbar {
+        @apply flex flex-wrap items-center gap-3;
+    }
+
+    .admin-products-count {
+        @apply inline-flex items-center rounded-full bg-sky-50 px-3 py-1 text-sm font-semibold text-sky-700;
+    }
+
+    .admin-product-sidecard {
+        background:
+            radial-gradient(circle at top right, rgba(34, 211, 238, 0.12), transparent 30%),
+            linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, rgba(239, 246, 255, 0.92) 100%);
+    }
 }
 
 @layer utilities {
@@ -979,6 +1082,310 @@
 
 @media (max-width: 1023px) {
     .dashboard-sidebar {
-        height: 100vh;
+        position: sticky;
+        top: 0;
     }
 }
+
+
+@layer components {
+    .dashboard-app-has-sidebar {
+        @apply relative;
+    }
+
+    .dashboard-sidebar-collapsible {
+        @apply fixed inset-y-0 left-0 z-40 w-[5.5rem] border-r border-b-0 px-3 py-5 transition-all duration-300;
+    }
+
+    .dashboard-sidebar-collapsible.is-expanded,
+    .dashboard-sidebar-collapsible:hover {
+        width: 18rem;
+    }
+
+    .dashboard-sidebar-collapsible .dashboard-brand {
+        @apply justify-center px-3;
+    }
+
+    .dashboard-sidebar-collapsible.is-expanded .dashboard-brand,
+    .dashboard-sidebar-collapsible:hover .dashboard-brand {
+        @apply justify-start px-4;
+    }
+
+    .dashboard-sidebar-collapsible .dashboard-nav-link {
+        @apply justify-center px-3;
+    }
+
+    .dashboard-sidebar-collapsible.is-expanded .dashboard-nav-link,
+    .dashboard-sidebar-collapsible:hover .dashboard-nav-link {
+        @apply justify-start px-4;
+    }
+
+    .dashboard-sidebar-collapsible [data-dashboard-label] {
+        @apply pointer-events-none w-0 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-200;
+    }
+
+    .dashboard-sidebar-collapsible.is-expanded [data-dashboard-label],
+    .dashboard-sidebar-collapsible:hover [data-dashboard-label] {
+        @apply w-auto opacity-100;
+    }
+
+    .dashboard-sidebar-collapsible .dashboard-secondary-link {
+        @apply px-0;
+    }
+
+    .dashboard-footer-short {
+        @apply inline-flex;
+    }
+
+    .dashboard-sidebar-collapsible.is-expanded .dashboard-footer-short,
+    .dashboard-sidebar-collapsible:hover .dashboard-footer-short {
+        @apply hidden;
+    }
+
+    .dashboard-sidebar-collapsible.is-expanded [data-dashboard-footer-link],
+    .dashboard-sidebar-collapsible:hover [data-dashboard-footer-link] {
+        @apply px-4;
+    }
+
+    .dashboard-main {
+        margin-left: 5.5rem;
+        transition: margin-left 0.3s ease;
+    }
+
+    .dashboard-menu-button {
+        @apply inline-flex;
+    }
+
+    .profile-shell {
+        @apply grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)];
+    }
+
+    .profile-summary-card {
+        @apply xl:col-span-2;
+        background:
+            radial-gradient(circle at top right, rgba(34, 211, 238, 0.12), transparent 28%),
+            linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(240,249,255,0.9) 100%);
+    }
+
+    .profile-summary-top {
+        @apply flex flex-col gap-5 sm:flex-row sm:items-center;
+    }
+
+    .profile-avatar {
+        @apply inline-flex h-20 w-20 items-center justify-center rounded-[28px] text-3xl font-semibold text-white;
+        background: linear-gradient(135deg, #1d4ed8 0%, #22d3ee 100%);
+        box-shadow: 0 18px 35px rgba(29, 78, 216, 0.24);
+    }
+
+    .profile-detail-grid {
+        @apply grid gap-4 md:grid-cols-2 xl:grid-cols-4;
+    }
+
+    .profile-detail-card {
+        @apply rounded-[22px] border border-sky-100 bg-white/80 px-4 py-4 shadow-sm;
+    }
+
+    .profile-detail-label {
+        @apply block text-xs font-semibold uppercase tracking-[0.18em] text-sky-600;
+    }
+
+    .profile-detail-value {
+        @apply mt-2 block text-base font-semibold text-slate-900;
+    }
+
+    .profile-panel-head {
+        @apply flex flex-col gap-3;
+    }
+
+    .profile-danger-panel {
+        @apply xl:col-span-2;
+    }
+}
+
+@media (min-width: 1024px) {
+    .dashboard-sidebar-collapsible {
+        width: 18rem;
+    }
+
+    .dashboard-sidebar-collapsible [data-dashboard-label] {
+        width: auto;
+        opacity: 1;
+    }
+
+    .dashboard-sidebar-collapsible .dashboard-footer-short {
+        display: none;
+    }
+
+    .dashboard-main {
+        margin-left: 18rem;
+    }
+
+    .dashboard-menu-button {
+        display: none;
+    }
+}
+
+@media (max-width: 1023px) {
+    .dashboard-sidebar-collapsible {
+        height: 100vh;
+    }
+
+    .dashboard-topbar {
+        margin-left: 0;
+    }
+
+    .profile-shell {
+        grid-template-columns: 1fr;
+    }
+}
+
+@layer components {
+    .auth-shell {
+        @apply min-h-screen text-slate-900;
+        background:
+            radial-gradient(circle at top left, rgba(34, 211, 238, 0.16), transparent 22%),
+            radial-gradient(circle at bottom right, rgba(29, 78, 216, 0.12), transparent 26%),
+            linear-gradient(180deg, #edf6ff 0%, #f8fbff 100%);
+    }
+
+    .auth-page {
+        @apply mx-auto grid min-h-screen w-full max-w-[1280px] items-center gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[1.02fr_.98fr] lg:px-8 lg:py-8;
+    }
+
+    .auth-hero {
+        @apply hidden h-full min-h-[42rem] flex-col justify-between rounded-[36px] px-7 py-8 text-white shadow-[0_30px_80px_rgba(8,23,49,0.22)] lg:flex;
+        background:
+            radial-gradient(circle at top right, rgba(34, 211, 238, 0.24), transparent 24%),
+            radial-gradient(circle at 18% 78%, rgba(125, 211, 252, 0.16), transparent 22%),
+            linear-gradient(155deg, #071a31 0%, #0b3155 58%, #0f5ea5 100%);
+    }
+
+    .auth-brand {
+        @apply inline-flex items-center gap-3 self-start text-white;
+    }
+
+    .auth-brand-mark {
+        @apply inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/95 text-lg font-bold text-slate-950;
+    }
+
+    .auth-brand-kicker {
+        @apply block text-xs uppercase tracking-[0.26em] text-cyan-200/80;
+    }
+
+    .auth-brand-name {
+        @apply text-lg font-semibold;
+    }
+
+    .auth-hero-copy {
+        @apply max-w-xl;
+    }
+
+    .auth-eyebrow {
+        @apply text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200/80;
+    }
+
+    .auth-hero-title {
+        @apply mt-4 text-balance text-4xl font-semibold tracking-tight;
+    }
+
+    .auth-hero-text {
+        @apply mt-4 text-base leading-8 text-slate-200;
+    }
+
+    .auth-benefits {
+        @apply grid gap-4;
+    }
+
+    .auth-benefit-card {
+        @apply rounded-[24px] border border-white/10 bg-white/10 p-4 backdrop-blur-sm;
+    }
+
+    .auth-benefit-title {
+        @apply text-sm font-semibold text-white;
+    }
+
+    .auth-benefit-text {
+        @apply mt-2 text-sm leading-6 text-slate-300;
+    }
+
+    .auth-card-wrap {
+        @apply flex min-h-[calc(100vh-3rem)] items-center justify-center lg:min-h-0;
+    }
+
+    .auth-card {
+        @apply w-full max-w-[34rem] rounded-[32px] border border-white/80 bg-white p-6 shadow-[0_26px_70px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-8;
+    }
+
+    .auth-form-grid {
+        @apply mt-2;
+    }
+
+    .auth-form-intro {
+        @apply mb-6;
+    }
+
+    .auth-form-kicker {
+        @apply text-xs font-semibold uppercase tracking-[0.26em] text-sky-600;
+    }
+
+    .auth-form-title {
+        @apply mt-2 text-3xl font-semibold tracking-tight text-slate-950;
+    }
+
+    .auth-form-text {
+        @apply mt-3 text-sm leading-7 text-slate-500;
+    }
+
+    .auth-status {
+        @apply mb-4 rounded-[18px] border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700;
+    }
+
+    .auth-password-wrap {
+        @apply relative;
+    }
+
+    .auth-password-toggle {
+        @apply absolute right-3 top-1/2 -translate-y-1/2 rounded-full px-3 py-1 text-xs font-semibold text-sky-700 transition hover:bg-sky-50;
+    }
+
+    .auth-form-meta {
+        @apply mt-5 flex flex-col gap-3 rounded-[20px] border border-slate-100 bg-slate-50/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between;
+    }
+
+    .auth-checkbox {
+        @apply inline-flex items-center gap-3 text-sm font-medium text-slate-700;
+    }
+
+    .auth-checkbox-input {
+        @apply h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500;
+    }
+
+    .auth-meta-copy {
+        @apply text-sm text-slate-500;
+    }
+
+    .auth-inline-link {
+        @apply text-sm font-semibold text-sky-700 transition hover:text-sky-900;
+    }
+
+    .auth-form-footer {
+        @apply mt-6 flex flex-wrap items-center justify-center gap-2 border-t border-slate-100 pt-5 text-sm text-slate-500;
+    }
+}
+
+@media (max-width: 1023px) {
+    .auth-page {
+        @apply block max-w-2xl;
+    }
+
+    .auth-card-wrap {
+        min-height: 100vh;
+    }
+}
+
+
+
+.auth-brand-logo {
+    @apply h-10 w-10 object-contain;
+}
+

@@ -156,20 +156,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const dashboardSidebar = document.querySelector('[data-dashboard-sidebar]');
     const dashboardBackdrop = document.querySelector('[data-dashboard-backdrop]');
     const dashboardToggle = document.querySelector('[data-dashboard-toggle]');
+    const compactSidebarMedia = window.matchMedia('(max-width: 1023px)');
 
-    const setDashboardSidebar = (isOpen) => {
-        if (!dashboardSidebar || !dashboardBackdrop || !dashboardToggle) return;
+    const syncSidebarState = (expanded) => {
+        if (!dashboardSidebar) return;
 
-        dashboardSidebar.classList.toggle('hidden', !isOpen);
-        dashboardBackdrop.classList.toggle('hidden', !isOpen);
-        document.body.classList.toggle('overflow-hidden', isOpen);
+        const shouldExpand = compactSidebarMedia.matches ? expanded : true;
+        dashboardSidebar.classList.toggle('is-collapsed', !shouldExpand);
+        dashboardSidebar.classList.toggle('is-expanded', shouldExpand);
+        dashboardBackdrop?.classList.toggle('hidden', !compactSidebarMedia.matches || !shouldExpand);
+        document.body.classList.toggle('overflow-hidden', compactSidebarMedia.matches && shouldExpand);
+        dashboardToggle?.setAttribute('aria-expanded', shouldExpand ? 'true' : 'false');
     };
 
-    dashboardToggle?.addEventListener('click', () => setDashboardSidebar(true));
-    dashboardBackdrop?.addEventListener('click', () => setDashboardSidebar(false));
+    syncSidebarState(false);
 
-    if (window.matchMedia('(min-width: 1024px)').matches) {
-        dashboardSidebar?.classList.remove('hidden');
-        dashboardBackdrop?.classList.add('hidden');
-    }
+    dashboardToggle?.addEventListener('click', () => {
+        const isExpanded = dashboardSidebar?.classList.contains('is-expanded');
+        syncSidebarState(!isExpanded);
+    });
+
+    dashboardBackdrop?.addEventListener('click', () => syncSidebarState(false));
+    compactSidebarMedia.addEventListener('change', () => syncSidebarState(false));
+
+    const uploadInput = document.querySelector('[data-product-upload-input]');
+    const uploadPreview = document.querySelector('[data-product-upload-preview]');
+
+    uploadInput?.addEventListener('change', (event) => {
+        const file = event.target.files?.[0];
+        if (!file || !uploadPreview) return;
+
+        const nextUrl = URL.createObjectURL(file);
+        uploadPreview.src = nextUrl;
+        uploadPreview.onload = () => URL.revokeObjectURL(nextUrl);
+    });
+
+    document.querySelectorAll('[data-auth-password-toggle]').forEach((toggle) => {
+        toggle.addEventListener('click', () => {
+            const wrap = toggle.closest('.auth-password-wrap');
+            const input = wrap?.querySelector('[data-auth-password-input]');
+            if (!input) return;
+
+            const showPassword = input.type === 'password';
+            input.type = showPassword ? 'text' : 'password';
+            toggle.textContent = showPassword ? 'Hide' : 'Show';
+        });
+    });
 });
