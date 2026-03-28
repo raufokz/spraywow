@@ -154,7 +154,7 @@ class ProductController extends Controller
             return;
         }
 
-        $publicStorageUrl = rtrim(asset('uploads/products'), '/').'/';
+        $publicStorageUrl = $this->productImageBaseUrl().'/';
 
         if (! str_starts_with($imageUrl, $publicStorageUrl)) {
             return;
@@ -163,7 +163,7 @@ class ProductController extends Controller
         $path = ltrim(Str::after($imageUrl, $publicStorageUrl), '/');
 
         if ($path !== '') {
-            $absolutePath = public_path('uploads/products/'.$path);
+            $absolutePath = $this->productImageDirectory().DIRECTORY_SEPARATOR.$path;
 
             if (is_file($absolutePath)) {
                 unlink($absolutePath);
@@ -179,7 +179,7 @@ class ProductController extends Controller
             return 'https://placehold.co/640x420/e2e8f0/475569?text=Product+Image';
         }
 
-        $directory = public_path('uploads/products');
+        $directory = $this->productImageDirectory();
 
         if (! is_dir($directory)) {
             if (! mkdir($directory, 0755, true) && ! is_dir($directory)) {
@@ -199,6 +199,16 @@ class ProductController extends Controller
             ]);
         }
 
-        return asset('uploads/products/'.$filename);
+        return $this->productImageBaseUrl().'/'.$filename;
+    }
+
+    protected function productImageDirectory(): string
+    {
+        return rtrim((string) env('PRODUCT_IMAGE_UPLOAD_DIR', public_path('uploads/products')), DIRECTORY_SEPARATOR);
+    }
+
+    protected function productImageBaseUrl(): string
+    {
+        return rtrim((string) env('PRODUCT_IMAGE_UPLOAD_URL', asset('uploads/products')), '/');
     }
 }

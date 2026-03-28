@@ -73,6 +73,7 @@ jobs:
       - name: Publish public files
         run: |
           rsync -avzr --delete \
+            --exclude "uploads/" \
             -e "ssh -p ${{ secrets.HPANEL_SSH_PORT }}" \
             public/ "${{ secrets.HPANEL_SSH_USER }}@${{ secrets.HPANEL_SSH_HOST }}:${{ secrets.HPANEL_PUBLIC_PATH }}/"
 
@@ -105,6 +106,11 @@ jobs:
             PHP
 
             cd ${{ secrets.HPANEL_APP_PATH }}
+            mkdir -p "${{ secrets.HPANEL_PUBLIC_PATH }}/uploads/products"
+            mkdir -p "${{ secrets.HPANEL_APP_PATH }}/public"
+            if [ ! -e "${{ secrets.HPANEL_APP_PATH }}/public/uploads" ]; then
+              ln -s "${{ secrets.HPANEL_PUBLIC_PATH }}/uploads" "${{ secrets.HPANEL_APP_PATH }}/public/uploads"
+            fi
             chmod -R 775 storage bootstrap/cache
             php artisan config:clear
             php artisan cache:clear
