@@ -41,23 +41,6 @@
     </div>
 
     <div class="admin-form-field">
-        <label for="product_link" class="admin-form-label">Product Link</label>
-        <input
-            id="product_link"
-            name="product_link"
-            type="url"
-            value="{{ old('product_link', $product->product_link) }}"
-            class="admin-form-input"
-            placeholder="https://example.com/product"
-            required
-        >
-        <p class="admin-form-help">Use a full URL including `https://`.</p>
-        @error('product_link')
-            <p class="admin-form-error">{{ $message }}</p>
-        @enderror
-    </div>
-
-    <div class="admin-form-field">
         <label for="image" class="admin-form-label">Product Image</label>
         <input
             id="image"
@@ -66,9 +49,8 @@
             accept=".jpg,.jpeg,.png,image/jpeg,image/png"
             class="admin-form-input admin-form-file"
             data-product-upload-input
-            {{ $product->exists ? '' : 'required' }}
         >
-        <p class="admin-form-help">Accepted: JPG or PNG, up to 2MB.</p>
+        <p class="admin-form-help">Optional. Accepted: JPG or PNG, up to 2MB.</p>
         @error('image')
             <p class="admin-form-error">{{ $message }}</p>
         @enderror

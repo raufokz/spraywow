@@ -26,7 +26,6 @@ class ProductController extends Controller
             'product' => new Product([
                 'name' => old('name'),
                 'description' => old('description'),
-                'product_link' => old('product_link'),
                 'image_url' => old('existing_image_url'),
             ]),
             'mode' => 'create',
@@ -70,8 +69,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
-            'product_link' => ['required', 'url', 'max:2048'],
-            'image' => [$product?->exists ? 'nullable' : 'required', 'file', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'image' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
 
         $categoryId = Category::query()->value('id');
@@ -84,12 +82,14 @@ class ProductController extends Controller
 
         $description = trim($validated['description']);
         $name = trim($validated['name']);
-        $shortDescription = Str::limit(strip_tags($description), 255);
+        $plainDescription = trim(strip_tags($description));
+        $tagline = Str::limit($plainDescription ?: $name, 140);
+        $shortDescription = Str::limit($plainDescription ?: $name, 220);
 
         $validated['category_id'] = $product?->category_id ?? $categoryId;
         $validated['slug'] = $this->uniqueSlug($name, $product);
         $validated['sku'] = $product?->sku ?: $this->generateSku($name);
-        $validated['tagline'] = Str::limit($shortDescription ?: $name, 255);
+        $validated['tagline'] = $tagline;
         $validated['short_description'] = $shortDescription ?: $name;
         $validated['price'] = $product?->price ?? 0;
         $validated['compare_price'] = $product?->compare_price;
@@ -97,7 +97,7 @@ class ProductController extends Controller
         $validated['benefits'] = $product?->benefits ?? [];
         $validated['stock'] = $product?->stock ?? 0;
         $validated['meta_title'] = $product?->meta_title ?: Str::limit($name.' | SprayWow', 255);
-        $validated['meta_description'] = $product?->meta_description ?: Str::limit($shortDescription ?: $name, 255);
+        $validated['meta_description'] = $product?->meta_description ?: Str::limit($plainDescription ?: $name, 160);
         $validated['is_featured'] = $product?->is_featured ?? false;
         $validated['is_active'] = $product?->is_active ?? true;
 
@@ -109,6 +109,8 @@ class ProductController extends Controller
             }
         } elseif ($product?->exists) {
             $validated['image_url'] = $product->image_url;
+        } else {
+            $validated['image_url'] = 'https://placehold.co/640x420/e2e8f0/475569?text=Product+Image';
         }
 
         unset($validated['image']);
@@ -172,14 +174,30 @@ class ProductController extends Controller
     protected function storeImage(Request $request): string
     {
         $file = $request->file('image');
+
+        if (! $file) {
+            return 'https://placehold.co/640x420/e2e8f0/475569?text=Product+Image';
+        }
+
         $directory = public_path('uploads/products');
 
         if (! is_dir($directory)) {
-            mkdir($directory, 0755, true);
+            if (! mkdir($directory, 0755, true) && ! is_dir($directory)) {
+                throw ValidationException::withMessages([
+                    'image' => 'Upload folder could not be created. Please try again.',
+                ]);
+            }
         }
 
         $filename = Str::uuid()->toString().'.'.$file->getClientOriginalExtension();
-        $file->move($directory, $filename);
+
+        try {
+            $file->move($directory, $filename);
+        } catch (\Throwable $exception) {
+            throw ValidationException::withMessages([
+                'image' => 'Image upload failed. Please try a JPG or PNG under 2MB.',
+            ]);
+        }
 
         return asset('uploads/products/'.$filename);
     }

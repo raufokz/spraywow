@@ -30,36 +30,26 @@
         <div class="dashboard-table-wrap mt-6 hidden lg:block">
             <table class="dashboard-table">
                 <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Name</th>
-                        <th>Link</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     @forelse($products as $product)
                         <tr>
                             <td>
                                 <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="admin-products-thumb">
                             </td>
-                            <td>
-                                <p class="font-semibold text-slate-950">{{ $product->name }}</p>
-                                <p class="mt-1 text-sm text-slate-500">{{ \Illuminate\Support\Str::limit($product->description, 90) }}</p>
-                            </td>
-                            <td>
-                                @if($product->product_link)
-                                    <a href="{{ $product->product_link }}" target="_blank" rel="noreferrer" class="dashboard-inline-link break-all">
-                                        {{ $product->product_link }}
-                                    </a>
-                                @else
-                                    <span class="text-slate-400">No link</span>
-                                @endif
-                            </td>
-                            <td>
-                                <div class="flex flex-wrap gap-3 text-sm font-semibold">
-                                    <a href="{{ route('admin.products.edit', $product) }}" class="text-sky-700">Edit</a>
-                                    <form method="POST" action="{{ route('admin.products.destroy', $product) }}" onsubmit="return confirm('Delete this product?');">
+                                <td>
+                                    <p class="font-semibold text-slate-950">{{ $product->name }}</p>
+                                    <p class="mt-1 text-sm text-slate-500">{{ \Illuminate\Support\Str::limit($product->description, 90) }}</p>
+                                </td>
+                                <td>
+                                    <div class="flex flex-wrap gap-3 text-sm font-semibold">
+                                        <a href="{{ route('admin.products.edit', $product) }}" class="text-sky-700">Edit</a>
+                                        <form method="POST" action="{{ route('admin.products.destroy', $product) }}" onsubmit="return confirm('Delete this product?');">
                                         @csrf
                                         @method('DELETE')
                                         <button class="text-rose-600">Delete</button>
@@ -69,7 +59,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center text-slate-500">No products found yet.</td>
+                            <td colspan="3" class="text-center text-slate-500">No products found yet.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -83,11 +73,6 @@
                     <div>
                         <h3 class="text-lg font-semibold text-slate-950">{{ $product->name }}</h3>
                         <p class="mt-2 text-sm leading-6 text-slate-500">{{ \Illuminate\Support\Str::limit($product->description, 110) }}</p>
-                        @if($product->product_link)
-                            <a href="{{ $product->product_link }}" target="_blank" rel="noreferrer" class="dashboard-inline-link mt-3 inline-flex break-all">
-                                Open product link
-                            </a>
-                        @endif
                     </div>
                     <div class="flex flex-wrap gap-3 text-sm font-semibold">
                         <a href="{{ route('admin.products.edit', $product) }}" class="text-sky-700">Edit</a>
