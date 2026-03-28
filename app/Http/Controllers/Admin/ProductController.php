@@ -56,7 +56,6 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
-        $this->deleteStoredImage($product->image_url);
         $product->delete();
 
         return back()->with('success', 'Product removed.');
@@ -109,10 +108,6 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             $validated['image_url'] = $this->storeImage($request);
             $validated['product_images'] = [$validated['image_url']];
-
-            if ($product?->exists) {
-                $this->deleteStoredImage($product->image_url);
-            }
         } elseif ($product?->exists) {
             $validated['image_url'] = $product->image_url;
         } else {
@@ -155,29 +150,6 @@ class ProductController extends Controller
         return $sku;
     }
 
-    protected function deleteStoredImage(?string $imageUrl): void
-    {
-        if (! $imageUrl) {
-            return;
-        }
-
-        $publicStorageUrl = $this->productImageBaseUrl().'/';
-
-        if (! str_starts_with($imageUrl, $publicStorageUrl)) {
-            return;
-        }
-
-        $path = ltrim(Str::after($imageUrl, $publicStorageUrl), '/');
-
-        if ($path !== '') {
-            $absolutePath = $this->productImageDirectory().DIRECTORY_SEPARATOR.$path;
-
-            if (is_file($absolutePath)) {
-                unlink($absolutePath);
-            }
-        }
-    }
-
     protected function storeImage(Request $request): string
     {
         $file = $request->file('image');
@@ -186,36 +158,22 @@ class ProductController extends Controller
             return 'https://placehold.co/640x420/e2e8f0/475569?text=Product+Image';
         }
 
-        $directory = $this->productImageDirectory();
-
-        if (! is_dir($directory)) {
-            if (! mkdir($directory, 0755, true) && ! is_dir($directory)) {
-                throw ValidationException::withMessages([
-                    'image' => 'Upload folder could not be created. Please try again.',
-                ]);
-            }
-        }
-
-        $filename = Str::uuid()->toString().'.'.$file->getClientOriginalExtension();
-
         try {
-            $file->move($directory, $filename);
+            $contents = file_get_contents($file->getRealPath());
         } catch (\Throwable $exception) {
             throw ValidationException::withMessages([
-                'image' => 'Image upload failed. Please try a JPG or PNG under 2MB.',
+                'image' => 'Image upload failed. Please try again with a JPG or PNG under 2MB.',
             ]);
         }
 
-        return $this->productImageBaseUrl().'/'.$filename;
-    }
+        if ($contents === false) {
+            throw ValidationException::withMessages([
+                'image' => 'Image data could not be read. Please try another file.',
+            ]);
+        }
 
-    protected function productImageDirectory(): string
-    {
-        return rtrim((string) env('PRODUCT_IMAGE_UPLOAD_DIR', public_path('uploads/products')), DIRECTORY_SEPARATOR);
-    }
+        $mimeType = $file->getMimeType() ?: 'image/'.$file->getClientOriginalExtension();
 
-    protected function productImageBaseUrl(): string
-    {
-        return rtrim((string) env('PRODUCT_IMAGE_UPLOAD_URL', asset('uploads/products')), '/');
+        return 'data:'.$mimeType.';base64,'.base64_encode($contents);
     }
 }
