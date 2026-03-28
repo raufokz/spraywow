@@ -44,10 +44,16 @@ jobs:
 
       - name: Prepare SSH key
         run: |
+          test -n "${{ secrets.HPANEL_SSH_KEY }}" || { echo "HPANEL_SSH_KEY is missing"; exit 1; }
+          test -n "${{ secrets.HPANEL_SSH_HOST }}" || { echo "HPANEL_SSH_HOST is missing"; exit 1; }
+          test -n "${{ secrets.HPANEL_SSH_PORT }}" || { echo "HPANEL_SSH_PORT is missing"; exit 1; }
           mkdir -p ~/.ssh
-          echo "${{ secrets.HPANEL_SSH_KEY }}" > ~/.ssh/id_rsa
+          printf '%s\n' "${{ secrets.HPANEL_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p "${{ secrets.HPANEL_SSH_PORT }}" -H "${{ secrets.HPANEL_SSH_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -T 30 -p "${{ secrets.HPANEL_SSH_PORT }}" -H "${{ secrets.HPANEL_SSH_HOST }}" >> ~/.ssh/known_hosts || {
+            echo "ssh-keyscan failed for host=${{ secrets.HPANEL_SSH_HOST }} port=${{ secrets.HPANEL_SSH_PORT }}";
+            exit 1;
+          }
 
       - name: Sync project to app directory
         run: |
