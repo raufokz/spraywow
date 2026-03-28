@@ -94,6 +94,11 @@ class ProductController extends Controller
         $validated['price'] = $product?->price ?? 0;
         $validated['compare_price'] = $product?->compare_price;
         $validated['gallery'] = $product?->gallery ?? [];
+        $validated['product_images'] = $product?->product_images ?? collect([$product?->image_url])
+            ->merge($product?->gallery ?? [])
+            ->filter()
+            ->values()
+            ->all();
         $validated['benefits'] = $product?->benefits ?? [];
         $validated['stock'] = $product?->stock ?? 0;
         $validated['meta_title'] = $product?->meta_title ?: Str::limit($name.' | SprayWow', 255);
@@ -103,6 +108,7 @@ class ProductController extends Controller
 
         if ($request->hasFile('image')) {
             $validated['image_url'] = $this->storeImage($request);
+            $validated['product_images'] = [$validated['image_url']];
 
             if ($product?->exists) {
                 $this->deleteStoredImage($product->image_url);
@@ -111,6 +117,7 @@ class ProductController extends Controller
             $validated['image_url'] = $product->image_url;
         } else {
             $validated['image_url'] = 'https://placehold.co/640x420/e2e8f0/475569?text=Product+Image';
+            $validated['product_images'] = [$validated['image_url']];
         }
 
         unset($validated['image']);

@@ -24,6 +24,7 @@ class Product extends Model
         'price',
         'compare_price',
         'image_url',
+        'product_images',
         'gallery',
         'benefits',
         'stock',
@@ -36,6 +37,7 @@ class Product extends Model
     protected function casts(): array
     {
         return [
+            'product_images' => 'array',
             'gallery' => 'array',
             'benefits' => 'array',
             'is_featured' => 'boolean',
